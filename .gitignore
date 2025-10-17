@@ -97,3 +97,14 @@ INSERT INTO ServiceMs (ServiceID, HotelID, ServiceName, Description, Price) VALU
 (3, 2, 'Airport Shuttle', 'Transportation to/from airport', 50.00),
 (4, 3, 'Guided Tour', 'Local sightseeing tours', 100.00),
 (5, 4, 'Laundry Service', 'Clothing cleaning and pressing', 30.00);
+CREATE TABLE StaffRoleMs (
+    RoleID INT PRIMARY KEY,
+    RoleName VARCHAR(100),
+    Description VARCHAR(255)
+);
+INSERT INTO StaffRoleMs (RoleID, RoleName, Description) VALUES
+(1, 'Manager', 'Oversees hotel operations'),
+(2, 'Receptionist', 'Handles guest check-ins and check-outs'),
+(3, 'Housekeeper', 'Maintains cleanliness of rooms and facilities'),
+(4, 'Chef', 'Prepares meals for guests'),
+(5, 'Concierge', 'Assists guests with services and information');
