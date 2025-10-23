@@ -9,7 +9,7 @@ CREATE TABLE HotelMs (
     PhoneNumber VARCHAR(20) UNIQUE,
     Email VARCHAR(100),
     Rating DECIMAL(2, 1)
-)
+);
 INSERT INTO HotelMs (HotelID, HotelName, Address, City, State, ZipCode, Country, PhoneNumber, Email, Rating) VALUES
 (1, 'Grand Plaza', '123 Main St', 'Metropolis', 'NY', '10001', 'USA', '555-1234', 'chat22gmail.com', 4.5),
 (2, 'Oceanview Resort', '456 Beach Ave', 'Seaside', 'CA', '90210', 'USA', '555-5678', 'oceanview22gmail.com', 4.7),
