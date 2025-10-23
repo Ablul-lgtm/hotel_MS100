@@ -40,7 +40,7 @@ CREATE TABLE BookingMs (
     BookingID INT PRIMARY KEY,
     HotelID INT,
     RoomID INT,
-    GuestName VARCHAR(100),
+    GuestName VARCHAR(100) UNIQUE,
     CheckInDate DATE,
     CheckOutDate DATE,
     TotalAmount DECIMAL(10, 2),
