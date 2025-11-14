@@ -108,3 +108,27 @@ INSERT INTO StaffRoleMs (RoleID, RoleName, Description) VALUES
 (3, 'Housekeeper', 'Maintains cleanliness of rooms and facilities'),
 (4, 'Chef', 'Prepares meals for guests'),
 (5, 'Concierge', 'Assists guests with services and information');
+
+Make a list that shows each HotelMs with its RoomMs. Show the RoomMs name and the HotelMs name. Only show active rows. Sort by RoomMs name.*/
+SELECT HotelMs.HotelName, RoomMs.RoomNumber
+FROM HotelMs
+JOIN RoomMs ON HotelMs.HotelID = RoomMs.HotelID
+WHERE RoomMs.IsAvailable = TRUE
+/* Find all BookingMs that do not have any HotelMs. We want to contact them. Show BookingMs name and ID.*/
+SELECT BookingMs.BookingID, BookingMs.GuestName
+FROM BookingMs
+LEFT JOIN HotelMs ON BookingMs.HotelID = HotelMs.HotelID
+WHERE HotelMs.HotelID IS NULL;
+/*Show all HotelMs that are not connected to any CustomerMs. Include HotelMs name. Sort by newest first if you have a date column*/
+SELECT HotelMs.HotelName
+FROM HotelMs
+LEFT JOIN CustomerMs ON HotelMs.HotelID = CustomerMs.CustomerID
+WHERE CustomerMs.CustomerID IS NULL;
+/* Make a full report for RoomMs and HotelMs. Show all rows from both tables and mark where there is no match. Use this to check data problems*/
+SELECT HotelMs.HotelName, RoomMs.RoomNumber
+FROM HotelMs    
+FULL OUTER JOIN RoomMs ON HotelMs.HotelID = RoomMs.HotelID;
+/* Find rows in HotelMs that look like duplicates. Show pairs of rows that have the same name but different IDs*/
+SELECT h1.HotelID AS HotelID1, h1.HotelName AS HotelName1, h2.HotelID AS HotelID2, h2.HotelName AS HotelName2
+FROM HotelMs h1
+JOIN HotelMs h2 ON h1.HotelName = h2.HotelName AND h1.HotelID <> h2.HotelID;
