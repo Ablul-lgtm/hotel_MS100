@@ -1,12 +1,12 @@
 CREATE TABLE HotelMs (
-    HotelID INT PRIMARY KEY NOT NULL,
+    HotelID INT PRIMARY KEY,
     HotelName VARCHAR(100) NOT NULL,
     Address VARCHAR(255),
     City VARCHAR(100),
     State VARCHAR(100),
     ZipCode VARCHAR(20),
     Country VARCHAR(100),
-    PhoneNumber VARCHAR(20) UNIQUE,
+    PhoneNumber VARCHAR(20),
     Email VARCHAR(100),
     Rating DECIMAL(2, 1)
 );
@@ -40,7 +40,7 @@ CREATE TABLE BookingMs (
     BookingID INT PRIMARY KEY,
     HotelID INT,
     RoomID INT,
-    GuestName VARCHAR(100) UNIQUE,
+    GuestName VARCHAR(100),
     CheckInDate DATE,
     CheckOutDate DATE,
     TotalAmount DECIMAL(10, 2),
@@ -109,6 +109,59 @@ INSERT INTO StaffRoleMs (RoleID, RoleName, Description) VALUES
 (4, 'Chef', 'Prepares meals for guests'),
 (5, 'Concierge', 'Assists guests with services and information');
 
+/*LAB3
+
+List all hotels in 'USA' where the Rating >= 4.5, ordered by Rating DESC.*/
+SELECT * 
+FROM HotelMs 
+WHERE Country='USA' AND Rating >= 4.5 
+ORDER BY Rating DESC;
+/*Show rooms that are available (IsAvailable = TRUE) and have a Price between 100 and 200.*/
+SELECT * 
+FROM RoomMs 
+WHERE IsAvailable=TRUE AND Price BETWEEN 100 AND 200;
+/*Retrieve all bookings where the CheckInDate is after '2024-08-01' and the TotalAmount > 500.*/
+SELECT * 
+FROM BookingMs 
+WHERE CheckInDate > '2024-08-01' AND TotalAmount > 500;
+/*List customers whose Email ends with 'gmail.com' and City is not specified in their Address.*/
+SELECT * 
+FROM CustomerMs 
+WHERE Email LIKE '%@gmail.com' AND (City IS NULL OR City = '');
+/*Find all staff whose Position contains 'Manager' or 'Receptionist', ordered alphabetically by LastName.*/
+SELECT *
+FROM StaffMs
+WHERE Position LIKE '%Manager%' OR Position LIKE '%Receptionist%'
+ORDER BY LastName ASC;
+/*Show all services with Price > 50, and sort them by HotelID ASC, then Price DESC.*/
+SELECT * 
+FROM ServiceMs 
+WHERE Price > 50 
+ORDER BY HotelID ASC, Price DESC;
+/*List all staff roles where the Description contains the word 'guest', case-insensitive.*/
+SELECT * 
+FROM StaffRoleMs 
+WHERE LOWER(Description) LIKE '%guest%';
+/*Find all rooms where RoomType = 'Suite' and IsAvailable = FALSE.*/
+SELECT *
+FROM RoomMs
+WHERE RoomType = 'Suite' AND IsAvailable = FALSE;
+/*Display hotels where Email IS NULL or PhoneNumber IS NULL.*/
+SELECT *
+FROM HotelMs
+WHERE Email IS NULL OR PhoneNumber IS NULL;
+/*Return the top 3 most expensive bookings (ORDER BY TotalAmount DESC LIMIT 3).*/
+SELECT *
+FROM BookingMs
+ORDER BY TotalAmount DESC
+LIMIT 3;
+
+
+
+
+
+/*LAB4
+
 Make a list that shows each HotelMs with its RoomMs. Show the RoomMs name and the HotelMs name. Only show active rows. Sort by RoomMs name.*/
 SELECT HotelMs.HotelName, RoomMs.RoomNumber
 FROM HotelMs
@@ -132,3 +185,56 @@ FULL OUTER JOIN RoomMs ON HotelMs.HotelID = RoomMs.HotelID;
 SELECT h1.HotelID AS HotelID1, h1.HotelName AS HotelName1, h2.HotelID AS HotelID2, h2.HotelName AS HotelName2
 FROM HotelMs h1
 JOIN HotelMs h2 ON h1.HotelName = h2.HotelName AND h1.HotelID <> h2.HotelID;
+
+
+
+
+
+/*LAB 5 */
+/*For each HotelMs, count how many RoomMs they have. Show only HotelMs with 5 or more RoomMs. Sort by this number from big to small*/
+SELECT 
+    h.HotelName,
+    COUNT(r.RoomID) AS RoomCount
+FROM HotelMs h
+LEFT JOIN RoomMs r ON h.HotelID = r.HotelID
+GROUP BY h.HotelID, h.HotelName
+HAVING COUNT(r.RoomID) >= 5
+ORDER BY RoomCount DESC;
+/*Show the total amount for each HotelMs for rows on or after :from_date. Only keep HotelMs where the total is bigger than :min_total.*/
+SELECT 
+    h.HotelName,
+    SUM(b.TotalAmount) AS TotalAmount
+FROM HotelMs h
+JOIN BookingMs b ON h.HotelID = b.HotelID
+WHERE b.CheckInDate >= '2024-07-01'
+GROUP BY h.HotelID, h.HotelName
+HAVING SUM(b.TotalAmount) > 500
+ORDER BY TotalAmount DESC;
+/* Find the average amount for each HotelMs, but only for rows where status = 'Completed'. Show only HotelMs where the average is bigger than :target.*/
+SELECT 
+    h.HotelName,
+    ROUND(AVG(b.TotalAmount), 2) AS AvgAmount
+FROM HotelMs h
+JOIN BookingMs b ON h.HotelID = b.HotelID
+GROUP BY h.HotelID, h.HotelName
+HAVING AVG(b.TotalAmount) > 600   -- məsələn :target = 600
+ORDER BY AvgAmount DESC;
+/*For each HotelMs, count how many different types or categories of RoomMs they have. Show only HotelMs with 3 or more different types.*/
+SELECT 
+    h.HotelName,
+    COUNT(DISTINCT r.RoomType) AS DifferentRoomTypes
+FROM HotelMs h
+LEFT JOIN RoomMs r ON h.HotelID = r.HotelID
+GROUP BY h.HotelID, h.HotelName
+HAVING COUNT(DISTINCT r.RoomType) >= 3
+ORDER BY DifferentRoomTypes DESC;
+/* Make a summary for each HotelMs with total amount, and also add a final row that shows the grand total for all HotelMs together (like a rollup).*/
+SELECT 
+    COALESCE(h.HotelName, '=== BÜTÜN OTELLƏR TOPLAM ===') AS HotelName,
+    SUM(b.TotalAmount) AS TotalAmount
+FROM HotelMs h
+LEFT JOIN BookingMs b ON h.HotelID = b.HotelID
+GROUP BY ROLLUP(h.HotelID, h.HotelName)
+ORDER BY 
+    CASE WHEN h.HotelName IS NULL THEN 1 ELSE 0 END,
+    TotalAmount DESC NULLS LAST;
