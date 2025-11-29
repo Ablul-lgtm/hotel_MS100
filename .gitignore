@@ -1,4 +1,15 @@
-CREATE TABLE HotelMs (
+IF OBJECT_ID('BookingMs', 'U') IS NOT NULL DROP TABLE BookingMs;
+IF OBJECT_ID('RoomMs', 'U') IS NOT NULL DROP TABLE RoomMs;
+IF OBJECT_ID('ServiceMs', 'U') IS NOT NULL DROP TABLE ServiceMs;
+IF OBJECT_ID('StaffMs', 'U') IS NOT NULL DROP TABLE StaffMs;
+
+
+IF OBJECT_ID('CustomerMs', 'U') IS NOT NULL DROP TABLE CustomerMs;
+IF OBJECT_ID('StaffRoleMs', 'U') IS NOT NULL DROP TABLE StaffRoleMs;
+IF OBJECT_ID('HotelMs', 'U') IS NOT NULL DROP TABLE HotelMs;
+
+
+CREATE TABLE HotelMS (
     HotelID INT PRIMARY KEY,
     HotelName VARCHAR(100) NOT NULL,
     Address VARCHAR(255),
@@ -22,20 +33,20 @@ CREATE TABLE RoomMs (
     RoomNumber VARCHAR(10) NOT NULL,
     RoomType VARCHAR(50),
     Price DECIMAL(10, 2),
-    IsAvailable BOOLEAN,
+    IsAvailable BIT,
     FOREIGN KEY (HotelID) REFERENCES HotelMs(HotelID)
 );
 INSERT INTO RoomMs (RoomID, HotelID, RoomNumber, RoomType, Price, IsAvailable) VALUES
-(1, 1, '101', 'Single', 100.00, TRUE),
-(2, 1, '102', 'Double', 150.00, TRUE),
-(3, 2, '201', 'Suite', 250.00, FALSE),
-(4, 2, '202', 'Single', 120.00, TRUE),
-(5, 3, '301', 'Double', 180.00, TRUE),
-(6, 3, '302', 'Suite', 300.00, FALSE),
-(7, 4, '401', 'Single', 110.00, TRUE),
-(8, 4, '402', 'Double', 160.00, TRUE),
-(9, 5, '501', 'Suite', 280.00, FALSE),
-(10, 5, '502', 'Single', 130.00, TRUE);
+(1, 1, '101', 'Single', 100.00, 1),
+(2, 1, '102', 'Double', 150.00, 1),
+(3, 2, '201', 'Suite', 250.00, 0),
+(4, 2, '202', 'Single', 120.00, 1),
+(5, 3, '301', 'Double', 180.00, 1),
+(6, 3, '302', 'Suite', 300.00, 0),
+(7, 4, '401', 'Single', 110.00, 1),
+(8, 4, '402', 'Double', 160.00, 1),
+(9, 5, '501', 'Suite', 280.00, 0),
+(10, 5, '502', 'Single', 130.00, 1);
 CREATE TABLE BookingMs (
     BookingID INT PRIMARY KEY,
     HotelID INT,
@@ -44,15 +55,16 @@ CREATE TABLE BookingMs (
     CheckInDate DATE,
     CheckOutDate DATE,
     TotalAmount DECIMAL(10, 2),
+    StatusM VARCHAR(50),
     FOREIGN KEY (HotelID) REFERENCES HotelMs(HotelID),
     FOREIGN KEY (RoomID) REFERENCES RoomMs(RoomID)
 );
-INSERT INTO BookingMs (BookingID, HotelID, RoomID, GuestName, CheckInDate, CheckOutDate, TotalAmount) VALUES
-(1, 1, 1, 'John Doe', '2024-07-01', '2024-07-05', 400.00),
-(2, 2, 3, 'Jane Smith', '2024-08-10', '2024-08-15', 1250.00),
-(3, 3, 5, 'Alice Johnson', '2024-09-20', '2024-09-22', 360.00),
-(4, 4, 7, 'Bob Brown', '2024-10-05', '2024-10-10', 550.00),
-(5, 5, 10, 'Charlie Davis', '2024-11-15', '2024-11-18', 390.00);
+INSERT INTO BookingMs (BookingID, HotelID, RoomID, GuestName, CheckInDate, CheckOutDate, TotalAmount, StatusM) VALUES
+(1, 1, 1, 'John Doe', '2024-07-01', '2024-07-05', 400.00, 'Completed'),
+(2, 2, 3, 'Jane Smith', '2024-08-10', '2024-08-15', 1250.00, 'Completed'),
+(3, 3, 5, 'Alice Johnson', '2024-09-20', '2024-09-22', 360.00, 'Pending'),
+(4, 4, 7, 'Bob Brown', '2024-10-05', '2024-10-10', 550.00, 'Completed'),
+(5, 5, 10, 'Charlie Davis', '2024-11-15', '2024-11-18', 390.00, 'Cancelled');
 CREATE TABLE CustomerMs (
     CustomerID INT PRIMARY KEY,
     FirstName VARCHAR(100),
@@ -108,133 +120,3 @@ INSERT INTO StaffRoleMs (RoleID, RoleName, Description) VALUES
 (3, 'Housekeeper', 'Maintains cleanliness of rooms and facilities'),
 (4, 'Chef', 'Prepares meals for guests'),
 (5, 'Concierge', 'Assists guests with services and information');
-
-/*LAB3
-
-List all hotels in 'USA' where the Rating >= 4.5, ordered by Rating DESC.*/
-SELECT * 
-FROM HotelMs 
-WHERE Country='USA' AND Rating >= 4.5 
-ORDER BY Rating DESC;
-/*Show rooms that are available (IsAvailable = TRUE) and have a Price between 100 and 200.*/
-SELECT * 
-FROM RoomMs 
-WHERE IsAvailable=TRUE AND Price BETWEEN 100 AND 200;
-/*Retrieve all bookings where the CheckInDate is after '2024-08-01' and the TotalAmount > 500.*/
-SELECT * 
-FROM BookingMs 
-WHERE CheckInDate > '2024-08-01' AND TotalAmount > 500;
-/*List customers whose Email ends with 'gmail.com' and City is not specified in their Address.*/
-SELECT * 
-FROM CustomerMs 
-WHERE Email LIKE '%@gmail.com' AND (City IS NULL OR City = '');
-/*Find all staff whose Position contains 'Manager' or 'Receptionist', ordered alphabetically by LastName.*/
-SELECT *
-FROM StaffMs
-WHERE Position LIKE '%Manager%' OR Position LIKE '%Receptionist%'
-ORDER BY LastName ASC;
-/*Show all services with Price > 50, and sort them by HotelID ASC, then Price DESC.*/
-SELECT * 
-FROM ServiceMs 
-WHERE Price > 50 
-ORDER BY HotelID ASC, Price DESC;
-/*List all staff roles where the Description contains the word 'guest', case-insensitive.*/
-SELECT * 
-FROM StaffRoleMs 
-WHERE LOWER(Description) LIKE '%guest%';
-/*Find all rooms where RoomType = 'Suite' and IsAvailable = FALSE.*/
-SELECT *
-FROM RoomMs
-WHERE RoomType = 'Suite' AND IsAvailable = FALSE;
-/*Display hotels where Email IS NULL or PhoneNumber IS NULL.*/
-SELECT *
-FROM HotelMs
-WHERE Email IS NULL OR PhoneNumber IS NULL;
-/*Return the top 3 most expensive bookings (ORDER BY TotalAmount DESC LIMIT 3).*/
-SELECT *
-FROM BookingMs
-ORDER BY TotalAmount DESC
-LIMIT 3;
-
-
-
-
-
-/*LAB4
-
-Make a list that shows each HotelMs with its RoomMs. Show the RoomMs name and the HotelMs name. Only show active rows. Sort by RoomMs name.*/
-SELECT HotelMs.HotelName, RoomMs.RoomNumber
-FROM HotelMs
-JOIN RoomMs ON HotelMs.HotelID = RoomMs.HotelID
-WHERE RoomMs.IsAvailable = TRUE
-/* Find all BookingMs that do not have any HotelMs. We want to contact them. Show BookingMs name and ID.*/
-SELECT BookingMs.BookingID, BookingMs.GuestName
-FROM BookingMs
-LEFT JOIN HotelMs ON BookingMs.HotelID = HotelMs.HotelID
-WHERE HotelMs.HotelID IS NULL;
-/*Show all HotelMs that are not connected to any CustomerMs. Include HotelMs name. Sort by newest first if you have a date column*/
-SELECT HotelMs.HotelName
-FROM HotelMs
-LEFT JOIN CustomerMs ON HotelMs.HotelID = CustomerMs.CustomerID
-WHERE CustomerMs.CustomerID IS NULL;
-/* Make a full report for RoomMs and HotelMs. Show all rows from both tables and mark where there is no match. Use this to check data problems*/
-SELECT HotelMs.HotelName, RoomMs.RoomNumber
-FROM HotelMs    
-FULL OUTER JOIN RoomMs ON HotelMs.HotelID = RoomMs.HotelID;
-/* Find rows in HotelMs that look like duplicates. Show pairs of rows that have the same name but different IDs*/
-SELECT h1.HotelID AS HotelID1, h1.HotelName AS HotelName1, h2.HotelID AS HotelID2, h2.HotelName AS HotelName2
-FROM HotelMs h1
-JOIN HotelMs h2 ON h1.HotelName = h2.HotelName AND h1.HotelID <> h2.HotelID;
-
-
-
-
-
-/*LAB 5 */
-/*For each HotelMs, count how many RoomMs they have. Show only HotelMs with 5 or more RoomMs. Sort by this number from big to small*/
-SELECT 
-    h.HotelName,
-    COUNT(r.RoomID) AS RoomCount
-FROM HotelMs h
-LEFT JOIN RoomMs r ON h.HotelID = r.HotelID
-GROUP BY h.HotelID, h.HotelName
-HAVING COUNT(r.RoomID) >= 5
-ORDER BY RoomCount DESC;
-/*Show the total amount for each HotelMs for rows on or after :from_date. Only keep HotelMs where the total is bigger than :min_total.*/
-SELECT 
-    h.HotelName,
-    SUM(b.TotalAmount) AS TotalAmount
-FROM HotelMs h
-JOIN BookingMs b ON h.HotelID = b.HotelID
-WHERE b.CheckInDate >= '2024-07-01'
-GROUP BY h.HotelID, h.HotelName
-HAVING SUM(b.TotalAmount) > 500
-ORDER BY TotalAmount DESC;
-/* Find the average amount for each HotelMs, but only for rows where status = 'Completed'. Show only HotelMs where the average is bigger than :target.*/
-SELECT 
-    h.HotelName,
-    ROUND(AVG(b.TotalAmount), 2) AS AvgAmount
-FROM HotelMs h
-JOIN BookingMs b ON h.HotelID = b.HotelID
-GROUP BY h.HotelID, h.HotelName
-HAVING AVG(b.TotalAmount) > 600   -- məsələn :target = 600
-ORDER BY AvgAmount DESC;
-/*For each HotelMs, count how many different types or categories of RoomMs they have. Show only HotelMs with 3 or more different types.*/
-SELECT 
-    h.HotelName,
-    COUNT(DISTINCT r.RoomType) AS DifferentRoomTypes
-FROM HotelMs h
-LEFT JOIN RoomMs r ON h.HotelID = r.HotelID
-GROUP BY h.HotelID, h.HotelName
-HAVING COUNT(DISTINCT r.RoomType) >= 3
-ORDER BY DifferentRoomTypes DESC;
-/* Make a summary for each HotelMs with total amount, and also add a final row that shows the grand total for all HotelMs together (like a rollup).*/
-SELECT 
-    COALESCE(h.HotelName, '=== BÜTÜN OTELLƏR TOPLAM ===') AS HotelName,
-    SUM(b.TotalAmount) AS TotalAmount
-FROM HotelMs h
-LEFT JOIN BookingMs b ON h.HotelID = b.HotelID
-GROUP BY ROLLUP(h.HotelID, h.HotelName)
-ORDER BY 
-    CASE WHEN h.HotelName IS NULL THEN 1 ELSE 0 END,
-    TotalAmount DESC NULLS LAST;
