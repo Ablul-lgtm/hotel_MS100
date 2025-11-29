@@ -1,3 +1,4 @@
+
 IF OBJECT_ID('BookingMs', 'U') IS NOT NULL DROP TABLE BookingMs;
 IF OBJECT_ID('RoomMs', 'U') IS NOT NULL DROP TABLE RoomMs;
 IF OBJECT_ID('ServiceMs', 'U') IS NOT NULL DROP TABLE ServiceMs;
@@ -51,20 +52,22 @@ CREATE TABLE BookingMs (
     BookingID INT PRIMARY KEY,
     HotelID INT,
     RoomID INT,
+    CustomerID INT,
     GuestName VARCHAR(100),
     CheckInDate DATE,
     CheckOutDate DATE,
     TotalAmount DECIMAL(10, 2),
     StatusM VARCHAR(50),
     FOREIGN KEY (HotelID) REFERENCES HotelMs(HotelID),
-    FOREIGN KEY (RoomID) REFERENCES RoomMs(RoomID)
+    FOREIGN KEY (RoomID) REFERENCES RoomMs(RoomID),
+    FOREIGN KEY (CustomerID) REFERENCES CustomerMs(CustomerID)
 );
 INSERT INTO BookingMs (BookingID, HotelID, RoomID, GuestName, CheckInDate, CheckOutDate, TotalAmount, StatusM) VALUES
-(1, 1, 1, 'John Doe', '2024-07-01', '2024-07-05', 400.00, 'Completed'),
-(2, 2, 3, 'Jane Smith', '2024-08-10', '2024-08-15', 1250.00, 'Completed'),
-(3, 3, 5, 'Alice Johnson', '2024-09-20', '2024-09-22', 360.00, 'Pending'),
-(4, 4, 7, 'Bob Brown', '2024-10-05', '2024-10-10', 550.00, 'Completed'),
-(5, 5, 10, 'Charlie Davis', '2024-11-15', '2024-11-18', 390.00, 'Cancelled');
+(1, 1, 1, 1, 'John Doe', '2024-07-01', '2024-07-05', 400.00, 'Completed'),
+(2, 2, 3, 2, 'Jane Smith', '2024-08-10', '2024-08-15', 1250.00, 'Completed'),
+(3, 3, 5, 3, 'Alice Johnson', '2024-09-20', '2024-09-22', 360.00, 'Pending'),
+(4, 4, 7, 4, 'Bob Brown', '2024-10-05', '2024-10-10', 550.00, 'Completed'),
+(5, 5, 10, 5, 'Charlie Davis', '2024-11-15', '2024-11-18', 390.00, 'Cancelled');
 CREATE TABLE CustomerMs (
     CustomerID INT PRIMARY KEY,
     FirstName VARCHAR(100),
@@ -72,8 +75,9 @@ CREATE TABLE CustomerMs (
     Email VARCHAR(100),
     PhoneNumber VARCHAR(20),
     Address VARCHAR(255)
+    FOREIGN KEY (BookingID) REFERENCES BookingMs(BookingID)
 );
-INSERT INTO CustomerMs (CustomerID, FirstName, LastName, Email, PhoneNumber, Address) VALUES
+INSERT INTO CustomerMs (CustomerID, BookingID, FirstName, LastName, Email, PhoneNumber, Address) VALUES
 (1, 'John', 'Doe', 'johndoe22gmail.com', '555-0001', '123 Elm St, Metropolis, NY'),
 (2, 'Jane', 'Smith', 'janesmith22gmail.com', '555-0002', '456 Oak St, Seaside, CA'),
 (3, 'Alice', 'Johnson', 'alicejohnson22gmail.com', '555-0003', '789 Pine St, Highland, CO'),
@@ -98,17 +102,19 @@ INSERT INTO StaffMs (StaffID, HotelID, FirstName, LastName, Position, Email, Pho
 CREATE TABLE ServiceMs (
     ServiceID INT PRIMARY KEY,
     HotelID INT,
+    BookingID INT,
     ServiceName VARCHAR(100),
     Description VARCHAR(255),
     Price DECIMAL(10, 2),
-    FOREIGN KEY (HotelID) REFERENCES HotelMs(HotelID)
+    FOREIGN KEY (HotelID) REFERENCES HotelMs(HotelID),
+    FOREIGN KEY (BookingID) REFERENCES BookingMs(BookingID)
 );
 INSERT INTO ServiceMs (ServiceID, HotelID, ServiceName, Description, Price) VALUES
-(1, 1, 'Spa Treatment', 'Relaxing spa services', 80.00),
-(2, 1, 'Room Service', 'In-room dining options', 20.00),
-(3, 2, 'Airport Shuttle', 'Transportation to/from airport', 50.00),
-(4, 3, 'Guided Tour', 'Local sightseeing tours', 100.00),
-(5, 4, 'Laundry Service', 'Clothing cleaning and pressing', 30.00);
+(1, 1, 1, 'Spa Treatment', 'Relaxing spa services', 80.00),
+(2, 1, 1, 'Room Service', 'In-room dining options', 20.00),
+(3, 2, 2, 'Airport Shuttle', 'Transportation to/from airport', 50.00),
+(4, 3, 4, 'Guided Tour', 'Local sightseeing tours', 100.00),
+(5, 4, 3, 'Laundry Service', 'Clothing cleaning and pressing', 30.00);
 CREATE TABLE StaffRoleMs (
     RoleID INT PRIMARY KEY,
     RoleName VARCHAR(100),
